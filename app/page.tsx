@@ -11,10 +11,12 @@ import {
   Globe2,
   Menu,
   MessageCircle,
+  Moon,
   Plus,
   Scale,
   ShieldCheck,
   Sparkles,
+  Sun,
   X,
 } from "lucide-react";
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState, type ReactNode } from "react";
@@ -243,6 +245,7 @@ export default function Home() {
   const [questionSearch, setQuestionSearch] = useState("");
   const [questionCategory, setQuestionCategory] = useState("Toutes les catégories");
   const [questionPage, setQuestionPage] = useState(0);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const filteredBusinessQuestions = businessQuestionCategories.filter(({ prompt, category }) =>
@@ -254,6 +257,28 @@ export default function Home() {
     questionPage * questionsPerPage,
     (questionPage + 1) * questionsPerPage,
   );
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("droit-cm-theme");
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    setTheme(savedTheme === "dark" || savedTheme === "light"
+      ? savedTheme
+      : mediaQuery.matches ? "dark" : "light");
+
+    function followSystemTheme(event: MediaQueryListEvent) {
+      if (!window.localStorage.getItem("droit-cm-theme")) {
+        setTheme(event.matches ? "dark" : "light");
+      }
+    }
+
+    mediaQuery.addEventListener("change", followSystemTheme);
+    return () => mediaQuery.removeEventListener("change", followSystemTheme);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -471,6 +496,20 @@ export default function Home() {
           </div>
           <div className="topbar-actions">
             <span className="country-tag"><span>🇨🇲</span> Cameroun</span>
+            <button
+              className="theme-toggle"
+              type="button"
+              aria-label={theme === "dark" ? "Activer le thème clair" : "Activer le thème sombre"}
+              title={theme === "dark" ? "Activer le thème clair" : "Activer le thème sombre"}
+              onClick={() => {
+                const nextTheme = theme === "dark" ? "light" : "dark";
+                window.localStorage.setItem("droit-cm-theme", nextTheme);
+                setTheme(nextTheme);
+              }}
+            >
+              {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+              <span>{theme === "dark" ? "Mode clair" : "Mode sombre"}</span>
+            </button>
             <button
               className="header-new-button"
               type="button"
