@@ -25,8 +25,19 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#183d31",
 };
+
+const themeBootstrap = `
+  try {
+    var preference = localStorage.getItem("droit-cm-theme");
+    if (preference === "light" || preference === "dark") {
+      document.documentElement.dataset.theme = preference;
+      document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
+        meta.content = preference === "dark" ? "#0b1117" : "#085081";
+      });
+    }
+  } catch {}
+`;
 
 export default function RootLayout({
   children,
@@ -35,6 +46,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
+      <head>
+        <meta
+          id="theme-color-light"
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content="#085081"
+        />
+        <meta
+          id="theme-color-dark"
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content="#0b1117"
+        />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body>{children}</body>
     </html>
   );

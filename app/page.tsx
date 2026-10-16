@@ -104,6 +104,8 @@ type InstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
+type ThemePreference = "system" | "light" | "dark";
+
 const starterSuggestions = [
   {
     icon: ShieldCheck,
@@ -251,7 +253,7 @@ export default function Home() {
   const [questionSearch, setQuestionSearch] = useState("");
   const [questionCategory, setQuestionCategory] = useState("Toutes les catégories");
   const [questionPage, setQuestionPage] = useState(0);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<ThemePreference>("system");
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const [installMessage, setInstallMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -268,20 +270,28 @@ export default function Home() {
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("droit-cm-theme");
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    setTheme(savedTheme === "dark" || savedTheme === "light"
-      ? savedTheme
-      : mediaQuery.matches ? "dark" : "light");
-
-    function followSystemTheme(event: MediaQueryListEvent) {
-      if (!window.localStorage.getItem("droit-cm-theme")) {
-        setTheme(event.matches ? "dark" : "light");
-      }
+    const preference: ThemePreference =
+      savedTheme === "light" || savedTheme === "dark" ? savedTheme : "system";
+    setTheme(preference);
+    if (preference === "system") {
+      delete document.documentElement.dataset.theme;
+    } else {
+      document.documentElement.dataset.theme = preference;
     }
 
-    mediaQuery.addEventListener("change", followSystemTheme);
-    return () => mediaQuery.removeEventListener("change", followSystemTheme);
+    const metaThemeColors = document.querySelectorAll<HTMLMetaElement>(
+      'meta[name="theme-color"]',
+    );
+    for (const meta of metaThemeColors) {
+      meta.content =
+        preference === "dark"
+          ? "#0b1117"
+          : preference === "light"
+            ? "#085081"
+            : meta.media.includes("dark")
+              ? "#0b1117"
+              : "#085081";
+    }
   }, []);
 
   useEffect(() => {
@@ -557,16 +567,42 @@ export default function Home() {
             <button
               className="theme-toggle"
               type="button"
-              aria-label={theme === "dark" ? "Activer le thème clair" : "Activer le thème sombre"}
-              title={theme === "dark" ? "Activer le thème clair" : "Activer le thème sombre"}
+              aria-label={`Thème ${theme === "system" ? "système" : theme === "dark" ? "sombre" : "clair"} ; cliquer pour changer`}
+              title={`Thème : ${theme === "system" ? "système" : theme === "dark" ? "sombre" : "clair"}`}
               onClick={() => {
-                const nextTheme = theme === "dark" ? "light" : "dark";
-                window.localStorage.setItem("droit-cm-theme", nextTheme);
+                const nextTheme: ThemePreference =
+                  theme === "system" ? "light" : theme === "light" ? "dark" : "system";
+                if (nextTheme === "system") {
+                  window.localStorage.removeItem("droit-cm-theme");
+                  delete document.documentElement.dataset.theme;
+                } else {
+                  window.localStorage.setItem("droit-cm-theme", nextTheme);
+                  document.documentElement.dataset.theme = nextTheme;
+                }
+                const metaThemeColors = document.querySelectorAll<HTMLMetaElement>(
+                  'meta[name="theme-color"]',
+                );
+                for (const meta of metaThemeColors) {
+                  meta.content =
+                    nextTheme === "dark"
+                      ? "#0b1117"
+                      : nextTheme === "light"
+                        ? "#085081"
+                        : meta.media.includes("dark")
+                          ? "#0b1117"
+                          : "#085081";
+                }
                 setTheme(nextTheme);
               }}
             >
-              {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
-              <span>{theme === "dark" ? "Mode clair" : "Mode sombre"}</span>
+              {theme === "system" ? (
+                <Globe2 size={17} />
+              ) : theme === "dark" ? (
+                <Sun size={17} />
+              ) : (
+                <Moon size={17} />
+              )}
+              <span>{theme === "system" ? "Système" : theme === "dark" ? "Mode sombre" : "Mode clair"}</span>
             </button>
             <button
               className="header-new-button"
