@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#183d31">
+    <title>Hors ligne — Droit.cm</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+        background: #f8f9f6;
+        color: #202824;
+      }
+      body {
+        display: grid;
+        min-height: 100vh;
+        margin: 0;
+        place-items: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      main {
+        width: min(100%, 440px);
+        padding: 30px;
+        border: 1px solid #e5eae4;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 12px 40px #243d2b12;
+      }
+      .brand { color: #55745b; font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+      h1 { margin: 18px 0 10px; font-size: clamp(26px, 6vw, 34px); line-height: 1.2; }
+      p { color: #68756c; font-size: 16px; line-height: 1.65; }
+      a {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 11px 16px;
+        border-radius: 9px;
+        background: #183d31;
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { background: #111713; color: #e0e8e1; }
+        main { border-color: #303b33; background: #1b231d; box-shadow: none; }
+        .brand { color: #a4c5a9; }
+        p { color: #9aa99e; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="brand">DROIT.CM · HORS LIGNE</span>
+      <h1>Vous êtes hors connexion</h1>
+      <p>
+        Vous pouvez rouvrir l’application, mais poser une question et obtenir
+        une nouvelle réponse juridique nécessite une connexion Internet.
+      </p>
+      <a href="/">Réessayer</a>
+    </main>
+  </body>
+</html>

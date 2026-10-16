@@ -1733,7 +1733,85 @@ textarea:focus-visible {
   background: #253129;
 }
 
+.install-button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid #d9e5db;
+  border-radius: 8px;
+  background: #eff5f0;
+  color: #315b3a;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.install-button:hover {
+  border-color: #bfd1c2;
+  background: #e6efe7;
+}
+
+.install-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 24px 0 auto;
+  padding: 9px 12px;
+  border: 1px solid #dce8dd;
+  border-radius: 8px;
+  background: #f3f8f3;
+  color: #3b6042;
+  font-size: 13px;
+}
+
+.install-status button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+:root[data-theme="dark"] .install-button {
+  border-color: #3d5942;
+  background: #26372a;
+  color: #c0dbc4;
+}
+
+:root[data-theme="dark"] .install-button:hover {
+  border-color: #55745b;
+  background: #304433;
+}
+
+:root[data-theme="dark"] .install-status {
+  border-color: #3d5942;
+  background: #223126;
+  color: #c0dbc4;
+}
+
 @media (max-width: 680px) {
+  .install-button {
+    width: 34px;
+    padding: 0;
+  }
+
+  .install-button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
   .theme-toggle {
     width: 34px;
     padding: 0;

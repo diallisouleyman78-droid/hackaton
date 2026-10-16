@@ -5,6 +5,7 @@ import {
   ArrowUp,
   BookOpen,
   ChevronDown,
+  Download,
   ExternalLink,
   FileText,
   Gavel,
@@ -96,6 +97,11 @@ type Message = {
   role: "user" | "assistant";
   content: string;
   citations?: Citation[];
+};
+
+type InstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
 const starterSuggestions = [
@@ -246,6 +252,8 @@ export default function Home() {
   const [questionCategory, setQuestionCategory] = useState("Toutes les catégories");
   const [questionPage, setQuestionPage] = useState(0);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
+  const [installMessage, setInstallMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const filteredBusinessQuestions = businessQuestionCategories.filter(({ prompt, category }) =>
@@ -279,6 +287,33 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      void navigator.serviceWorker
+        .register("/sw.js")
+        .catch((registrationError: unknown) => {
+          console.error("Could not register the Droit.cm service worker:", registrationError);
+        });
+    }
+
+    function captureInstallPrompt(event: Event) {
+      event.preventDefault();
+      setInstallPrompt(event as InstallPromptEvent);
+    }
+
+    function handleAppInstalled() {
+      setInstallPrompt(null);
+      setInstallMessage("Droit.cm a été installée sur votre appareil.");
+    }
+
+    window.addEventListener("beforeinstallprompt", captureInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", captureInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -396,6 +431,23 @@ export default function Home() {
     setSidebarOpen(false);
   }
 
+  async function installApp() {
+    if (!installPrompt) return;
+
+    try {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      setInstallPrompt(null);
+      if (choice.outcome === "dismissed") {
+        setInstallMessage("Installation annulée. Vous pourrez l’installer plus tard depuis votre navigateur.");
+      }
+    } catch (promptError) {
+      console.error("Could not prompt to install Droit.cm:", promptError);
+      setInstallMessage("L’installation n’a pas pu être lancée. Réessayez depuis le menu de votre navigateur.");
+      setInstallPrompt(null);
+    }
+  }
+
   return (
     <main className="app-shell">
       <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
@@ -496,6 +548,12 @@ export default function Home() {
           </div>
           <div className="topbar-actions">
             <span className="country-tag"><span>🇨🇲</span> Cameroun</span>
+            {installPrompt && (
+              <button className="install-button" type="button" onClick={() => void installApp()}>
+                <Download size={16} />
+                <span>Installer l’application</span>
+              </button>
+            )}
             <button
               className="theme-toggle"
               type="button"
@@ -519,6 +577,14 @@ export default function Home() {
             </button>
           </div>
         </header>
+        {installMessage && (
+          <p className="install-status" role="status">
+            {installMessage}
+            <button type="button" aria-label="Fermer" onClick={() => setInstallMessage("")}>
+              <X size={14} />
+            </button>
+          </p>
+        )}
 
         <div className={`conversation ${messages.length ? "conversation-active" : ""}`}>
           {messages.length === 0 ? (
