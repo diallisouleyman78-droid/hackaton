@@ -36,9 +36,13 @@ npm run dev
 
 Ouvre [http://localhost:3000](http://localhost:3000).
 
+### Déploiement sur Vercel
+
+Le fichier `data/documents.json` est nécessaire à la recherche. Après l'avoir généré avec `npm run index-documents`, ajoute-le au dépôt Git avec les changements, puis redéploie sur Vercel. La configuration Next.js inclut cet index dans la fonction `/api/chat`. Les PDF sources doivent aussi être hébergés séparément pour que les liens des citations fonctionnent sur Vercel.
+
 ## Extraction et OCR
 
-`npm run index-documents` parcourt les PDF des deux dossiers, extrait le texte et crée `data/documents.json` (ce fichier généré est ignoré par Git). Les fichiers identiques sont dédupliqués, en privilégiant les documents de `reglementation/` lors de la recherche.
+`npm run index-documents` parcourt les PDF des deux dossiers, extrait le texte et crée `data/documents.json`. Ce fichier doit être conservé dans Git pour que la recherche fonctionne sur Vercel. Les fichiers identiques sont dédupliqués, en privilégiant les documents de `reglementation/` lors de la recherche.
 
 Pour appliquer l'OCR aux pages qui ne contiennent presque aucun texte extractible :
 
